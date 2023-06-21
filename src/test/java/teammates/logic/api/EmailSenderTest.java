@@ -4,12 +4,14 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.testng.annotations.Test;
+import org.apache.http.HttpStatus;
 
 import com.mailjet.client.MailjetRequest;
 import com.mailjet.client.resource.Email;
 import com.sendgrid.helpers.mail.Mail;
 import com.sun.jersey.multipart.FormDataMultiPart;
 
+import teammates.common.util.EmailSendingStatus;
 import teammates.common.util.EmailWrapper;
 import teammates.logic.external.MailgunService;
 import teammates.logic.external.MailjetService;
@@ -97,4 +99,26 @@ public class EmailSenderTest extends BaseLogicTest {
         assertEquals(wrapper.getContent(), email.get(Email.HTMLPART));
     }
 
+    @Test
+    public void testSendEmailWithTestingAccount() {
+        EmailWrapper wrapper = new EmailWrapper();
+        wrapper.setRecipient("test@gmail.tmt");
+
+        EmailSender emailSender = new EmailSender();
+        EmailSendingStatus status = emailSender.sendEmail(wrapper);
+
+        assertEquals(HttpStatus.SC_OK, status.getStatusCode());
+        assertEquals("Not sending email to test account", status.getMessage());
+    }
+
+    @Test
+    public void testSendEmail() {
+        EmailWrapper wrapper = getTypicalEmailWrapper();
+        EmailSender emailSender = new EmailSender();
+
+        EmailSendingStatus status = emailSender.sendEmail(wrapper);
+
+        assertEquals(HttpStatus.SC_OK, status.getStatusCode());
+        assertNull(status.getMessage());
+    }
 }
